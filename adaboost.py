@@ -6,16 +6,17 @@ def adaboost_train(X, Y, max_iter):
     f = []
     alpha = []
     for k in range(max_iter):
-        stomp = tree.DecisionTreeClassifier(max_depth=1)
-        stomp.fit(X, Y)
-        f.append(stomp)
-        predictions = stomp.predict(X)
+        # Create and train the decision stump
+        stump = tree.DecisionTreeClassifier(max_depth=1, random_state=0)
+        stump.fit(X, Y)
+        # Add decision stump to the list
+        f.append(stump)
+        # Get the stump's predictions on the data set
+        predictions = stump.predict(X)
+        # Calculate the stump's error and alpha, add to list
         err = sum([predictions[i] != Y[i] for i in range(len(Y))]) / len(Y)
         a = 0.5 * np.log((1 - err) / err)
         alpha.append(a)
-
-        # print(Y)
-        # print([np.exp(-a) * Y[i] * predictions[i] for i in range(len(Y))])
 
         new_X = []
         new_y = []
@@ -29,8 +30,6 @@ def adaboost_train(X, Y, max_iter):
         X = new_X
         Y = new_y
 
-        # print(Y)
-
     return f, alpha
 
 
@@ -42,8 +41,16 @@ def adaboost_test(X, Y, f, alpha):
     return correct / len(Y)
 
 
-X = [[-2,-2],[-3,-2],[-2,-3],[-1,-1],[-1,0],[0,-1],[1,1],[1,0],[0,1],[2,2],[3,2],[2,3]]
-Y=[-1,-1,-1,1,1,1,-1,-1,-1,1,1,1]
-f, alpha = adaboost_train(X,Y,9)
-acc = adaboost_test(X,Y,f,alpha)
-print("Accuracy:", acc)
+# X = [[2,3], [2,2], [4,6], [4,3], [4,1], [5,7], [5,3], [6,5], [8,6], [8,2]]
+# Y=[1,1,1,-1,-1,1,-1,1,-1,-1]
+# # X = [[-2,-2],[-3,-2],[-2,-3],[-1,-1],[-1,0],[0,-1],[1,1],[1,0],[0,1],[2,2],[3,2],[2,3]]
+# # Y=[-1,-1,-1,1,1,1,-1,-1,-1,1,1,1]
+# f, alpha = adaboost_train(X,Y,5)
+# acc = adaboost_test(X,Y,f,alpha)
+# print("Accuracy:", acc)
+#
+# from sklearn.ensemble import AdaBoostClassifier
+# from sklearn.datasets import make_classification
+# clf = AdaBoostClassifier(n_estimators=5, random_state=0)
+# clf.fit(X, Y)
+# print(clf.score(X, Y))
