@@ -1,3 +1,6 @@
+# Jimson Huang
+# CS 422 - Project 3
+
 import numpy as np
 from sklearn import tree
 
@@ -5,10 +8,15 @@ from sklearn import tree
 def adaboost_train(X, Y, max_iter):
     f = []
     alpha = []
+
     for k in range(max_iter):
+        # Initialize even sample weights
+        d = [1 / len(Y)] * len(Y)
+
         # Create and train the decision stump
         stump = tree.DecisionTreeClassifier(max_depth=1, random_state=0)
         stump.fit(X, Y)
+
         # Add decision stump to the list
         f.append(stump)
         # Get the stump's predictions on the data set
@@ -18,17 +26,22 @@ def adaboost_train(X, Y, max_iter):
         a = 0.5 * np.log((1 - err) / err)
         alpha.append(a)
 
-        # Create new data set, if the prediction doesn't match the label, duplicate the sample
-        # NOT SURE IF CORRECT
+        # Calculate new sample weights
+        new_d = []
+        for i in range(len(Y)):
+            new_d.append(d[i] * np.exp(-alpha[k] * Y[i] * predictions[i]))
+
+        # Normalize the new sample weights by dividing by Z
+        Z = sum(new_d)
+        new_d = [j / Z for j in new_d]
+
+        # Add copies of sample to data based on its weight
         new_X = []
         new_y = []
         for i in range(len(Y)):
-            if Y[i] * predictions[i] <= 0:
-                new_y += 2 * [Y[i]]
-                new_X += 2 * [X[i]]
-            else:
-                new_y += [Y[i]]
-                new_X += [X[i]]
+            copies = round(new_d[i] / min(new_d))
+            new_y += copies * [Y[i]]
+            new_X += copies * [X[i]]
         X = new_X
         Y = new_y
 
